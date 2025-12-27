@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -9,27 +10,41 @@ using std::cout;
 using std::endl;
 
 // TODO: Make the error handling more robust
+//
+//
+// TODO: print absolute offsets instead of line numbers
 
-void hexdump(const std::vector<std::byte> &buf, int limit = 64)
+void hexdump(const std::vector<std::byte> &buf, size_t limit = 64)
 {
 	int bytesWritten = 0;
-	for (int i = 0; i < buf.size() && i < limit; i++)
-	{
-		if (i % 16 == 0)
-			cout << std::setfill('0') << std::setw(8) << std::hex << i << ": ";
 
-		cout << std::setw(2) << std::hex << std::to_integer<int>(buf[i]);
+	// creating a temp out stream, to prevent global stream poisoning
+	std::ostringstream outStream;
+
+	for (size_t i = 0; i < buf.size() && i < limit; i++)
+	{
+		// the "line" address
+		if (i % 16 == 0)
+			outStream << std::setfill('0') << std::setw(8) << std::hex << i
+			          << ": ";
+
+		// casting std::byte to int directly is wrong -> defeats the purpose of
+		// std::byte. requires explicity type conversion
+		outStream << std::setw(2) << std::hex << std::to_integer<int>(buf[i]);
 		bytesWritten++;
 
+		// group into pairs of two
 		if (bytesWritten % 2 == 0)
-			cout << " ";
+			outStream << " ";
 
 		if (i % 16 == 15)
 		{
-			cout << "\n";
+			outStream << "\n";
 			bytesWritten = 0;
 		}
 	}
+
+	cout << outStream.str();
 }
 
 int main(int argc, char *argv[])
