@@ -10,13 +10,17 @@ using std::cout;
 using std::endl;
 
 // TODO: Make the error handling more robust
-//
+// HACK:  Why does reinterpret_cast cast work here, and not something else???
 //
 // TODO: print absolute offsets instead of line numbers
+// TEST: test the partial line fix
+//
 
-void hexdump(const std::vector<std::byte> &buf, size_t limit = 64)
+void hexdump(const std::vector<std::byte> &buf, size_t limit = 64,
+             size_t bytesPerGroup = 2, size_t bytesPerLine = 16)
 {
 	int bytesWritten = 0;
+	std::string asciiString;
 
 	// creating a temp out stream, to prevent global stream poisoning
 	std::ostringstream outStream;
@@ -24,24 +28,52 @@ void hexdump(const std::vector<std::byte> &buf, size_t limit = 64)
 	for (size_t i = 0; i < buf.size() && i < limit; i++)
 	{
 		// the "line" address
-		if (i % 16 == 0)
-			outStream << std::setfill('0') << std::setw(8) << std::hex << i
+		if (i % bytesPerLine == 0)
+			outStream << std::setw(8) << std::setfill('0') << std::hex << i
 			          << ": ";
 
 		// casting std::byte to int directly is wrong -> defeats the purpose of
 		// std::byte. requires explicity type conversion
-		outStream << std::setw(2) << std::hex << std::to_integer<int>(buf[i]);
-		bytesWritten++;
+		int byte = std::to_integer<int>(buf[i]);
+		outStream << std::setw(2) << std::setfill('0') << std::hex << byte;
 
-		// group into pairs of two
-		if (bytesWritten % 2 == 0)
+		// write the ascii value if its a printable char
+		if (byte >= 32 && byte <= 126)
+			asciiString.push_back(static_cast<char>(byte));
+		else
+			asciiString.push_back('.');
+
+		// group into pairs
+		if (i % bytesPerGroup == 1)
 			outStream << " ";
 
-		if (i % 16 == 15)
+		// add the ascii string at the end of a line
+		if (i % bytesPerLine == bytesPerLine - 1)
 		{
+			outStream << "  |  " << asciiString;
 			outStream << "\n";
-			bytesWritten = 0;
+
+			asciiString = "";
 		}
+	}
+
+	// if the last line was partial
+	size_t remaining = asciiString.size();
+	if (remaining > 0 && remaining < bytesPerLine)
+	{
+		size_t missing = bytesPerLine - remaining;
+
+		// each byte prints as "XX", plus a space after each group
+		for (size_t j = 0; j < missing; j++)
+		{
+			outStream << "  "; // missing hex byte
+
+			// add group space if needed
+			if ((remaining + j) % bytesPerGroup == bytesPerGroup - 1)
+				outStream << " ";
+		}
+
+		outStream << "  |  " << asciiString << "\n";
 	}
 
 	cout << outStream.str();
@@ -69,7 +101,7 @@ int main(int argc, char *argv[])
 
 	// find size of file
 	file.seekg(0, std::fstream::end);
-	int size = file.tellg();
+	size_t size = file.tellg();
 	file.seekg(0, std::fstream::beg);
 
 	// read it into a buffer
@@ -77,7 +109,7 @@ int main(int argc, char *argv[])
 	file.read(reinterpret_cast<char *>(buffer.data()), size);
 
 	// hexdump the buffer
-	hexdump(buffer);
+	hexdump(buffer, buffer.size());
 
 	return 0;
 }
