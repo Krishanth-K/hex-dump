@@ -1,4 +1,7 @@
 *.bin
 *.exe
 *.elf
+*.o
 cli
+
+trie.py
