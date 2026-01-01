@@ -13,6 +13,7 @@ void AhoCorasick::AddPattern(std::vector<std::byte> pattern)
 	this->patterns.push_back(pattern);
 }
 
+// build the trie
 void AhoCorasick::BuildTrie()
 {
 	this->root = std::make_shared<TrieNode>();
@@ -79,7 +80,6 @@ void AhoCorasick::AssignFailureLinks()
 	}
 }
 
-// Overload for binary data (useful for file type detection)
 std::vector<std::pair<size_t, std::vector<std::byte>>>
 AhoCorasick::Search(const std::vector<std::byte> &data)
 {

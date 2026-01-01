@@ -28,3 +28,9 @@ class AhoCorasick {
 	std::vector<std::pair<size_t, std::vector<std::byte>>>
 	Search(const std::vector<std::byte> &data);
 };
+
+struct Match
+{
+	size_t start_offset;
+	size_t pattern_id;
+};
