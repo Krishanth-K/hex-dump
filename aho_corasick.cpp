@@ -18,8 +18,9 @@ void AhoCorasick::BuildTrie()
 {
 	this->root = std::make_shared<TrieNode>();
 
-	for (const auto &pattern : this->patterns)
+	for (int i = 0; i < this->patterns.size(); i++)
 	{
+		auto pattern = this->patterns[i];
 		std::shared_ptr<TrieNode> node = this->root;
 
 		for (const auto &byte : pattern)
@@ -29,7 +30,7 @@ void AhoCorasick::BuildTrie()
 
 			node = node->children[byte];
 		}
-		node->ending_patterns.push_back(pattern);
+		node->ending_patterns.push_back(i);
 	}
 }
 
@@ -80,10 +81,9 @@ void AhoCorasick::AssignFailureLinks()
 	}
 }
 
-std::vector<std::pair<size_t, std::vector<std::byte>>>
-AhoCorasick::Search(const std::vector<std::byte> &data)
+std::vector<Match> AhoCorasick::Search(const std::vector<std::byte> &data)
 {
-	std::vector<std::pair<size_t, std::vector<std::byte>>> results;
+	std::vector<Match> results;
 	auto current = this->root;
 
 	for (size_t i = 0; i < data.size(); ++i)
@@ -97,9 +97,14 @@ AhoCorasick::Search(const std::vector<std::byte> &data)
 		if (current->children.find(b) != current->children.end())
 			current = current->children[b];
 
-		for (const auto &pattern : current->ending_patterns)
-			results.emplace_back(i, pattern);
+		for (const auto &pattern_id : current->ending_patterns)
+		{
+			size_t start_offset = i - this->getPattern(pattern_id).size() + 1;
+			results.push_back({start_offset, pattern_id});
+		}
 	}
 
 	return results;
 }
+
+Pattern &AhoCorasick::getPattern(size_t id) { return this->patterns.at(id); }

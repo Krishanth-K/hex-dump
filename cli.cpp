@@ -18,14 +18,8 @@ using std::endl;
 // TEST: test the partial line fix
 //
 
-#include <cstddef>
-#include <iomanip>
-#include <iostream>
-#include <vector>
-
 // print all matches
-void print_search_results(
-    const std::vector<std::pair<size_t, std::vector<std::byte>>> &results)
+void print_search_results(const std::vector<Match> &results, AhoCorasick &tree)
 {
 	if (results.empty())
 	{
@@ -35,11 +29,12 @@ void print_search_results(
 
 	std::cout << "[+] Matches found: " << results.size() << "\n";
 
-	for (const auto &[pos, pattern] : results)
+	for (const auto &[pos, pattern_id] : results)
 	{
 		std::cout << "  Offset: 0x" << std::hex << pos << std::dec
 		          << " | Pattern: ";
 
+		auto pattern = tree.getPattern(pattern_id);
 		for (std::byte b : pattern)
 		{
 			uint8_t v = std::to_integer<uint8_t>(b);
@@ -170,7 +165,7 @@ int main(int argc, char *argv[])
 	tree.BuildTrie();
 	tree.AssignFailureLinks();
 	auto res = tree.Search(std::vector(buffer.begin(), buffer.begin() + 30));
-	print_search_results(res);
+	print_search_results(res, tree);
 
 	return 0;
 }
