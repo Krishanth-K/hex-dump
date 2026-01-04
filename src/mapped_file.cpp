@@ -37,3 +37,6 @@ MappedFile::~MappedFile()
 	if (this->start_byte)
 		munmap(this->start_byte, this->len);
 }
+
+const std::byte *MappedFile::getData() const { return this->start_byte; }
+size_t MappedFile::getSize() const { return this->len; }

@@ -28,6 +28,7 @@ set(SOURCES
     src/cli.cpp
     src/aho_corasick.cpp
     src/mapped_file.cpp
+    src/validator.cpp
 )
 
 # ---- Target ----

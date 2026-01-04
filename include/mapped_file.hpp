@@ -13,4 +13,7 @@ class MappedFile {
 
 	MappedFile(const char *filePath);
 	~MappedFile();
+
+	const std::byte *getData() const;
+	size_t getSize() const;
 };

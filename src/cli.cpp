@@ -206,6 +206,10 @@ std::vector<Signature> file_signatures = {
     // MP4
     {hexToBytes("66 74 79 70 69 73 6F 6D"), "mp4", 4},
     {hexToBytes("66 74 79 70 4D 53 4E 56"), "mp4", 4},
+
+    // ISO
+    {hexToBytes("43 44 30 30 31"), "iso", 0x8001},
+    {hexToBytes("43 44 30 30 31"), "iso", 0x9001},
 };
 
 std::vector<Signature> getSignatures() { return file_signatures; }

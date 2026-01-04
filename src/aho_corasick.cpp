@@ -1,6 +1,5 @@
 #include "aho_corasick.hpp"
 #include <cstddef>
-#include <locale>
 #include <memory>
 #include <queue>
 #include <vector>

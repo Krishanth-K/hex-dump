@@ -2,6 +2,7 @@
 #include "cli.hpp"
 #include "mapped_file.hpp"
 #include "signature.hpp"
+#include "validator.hpp"
 #include <cstddef>
 #include <fcntl.h>
 #include <fstream>
@@ -45,11 +46,11 @@ int main(int argc, char *argv[])
 	// const std::string filePath = argv[1];
 
 	// const std::string filePath = "./build/nets_engine.exe";
-	const std::string filePath = "./build/test.zip";
+	// const std::string filePath = "./build/test.zip";
 	// const std::string filePath = "./build/L9-Quick Review of Process.pptx";
 	// const std::string filePath = "./build/ramdump.raw";
 	// const std::string filePath = "./build/archlinux-2026.01.01-x86_64.iso";
-	// const std::string filePath = "./build/LAB-3.docx";
+	const std::string filePath = "./build/LAB-3.docx";
 	// const std::string filePath = "./build/ATDE-32-ATDE221253.pdf";
 	// const std::string filePath = "./build/Emotet Malware _ CISA.html";
 
@@ -82,8 +83,12 @@ int main(int argc, char *argv[])
 
 	// Search for patterns
 	std::vector<const Signature *> res = tree.Search(mapFile);
+	auto filetypes = detectFiletypes(mapFile, res);
 
-	print_search_results(res);
+	// print_search_results(res);
+
+	for (const auto &type : filetypes)
+		cout << "filetype: " << type << "\n";
 
 	return 0;
 }

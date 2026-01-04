@@ -1,6 +1,7 @@
 #pragma once
 
-#include "cli.hpp"
+#include "mapped_file.hpp"
+#include "signature.hpp"
 #include <cstddef>
 #include <memory>
 #include <unordered_map>
