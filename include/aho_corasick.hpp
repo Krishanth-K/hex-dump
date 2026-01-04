@@ -1,17 +1,10 @@
 #pragma once
 
+#include "cli.hpp"
 #include <cstddef>
 #include <memory>
 #include <unordered_map>
 #include <vector>
-
-using Pattern = std::vector<std::byte>;
-
-struct Match
-{
-	size_t start_offset;
-	size_t pattern_id;
-};
 
 class TrieNode {
   public:
@@ -26,16 +19,16 @@ class TrieNode {
 
 class AhoCorasick {
 	std::shared_ptr<TrieNode> root;
-	std::vector<Pattern> patterns{};
+	std::vector<const Signature *> patterns;
 
   public:
 	AhoCorasick();
 
-	Pattern &getPattern(size_t id);
+	const Signature *getSignature(size_t id);
 
-	void AddPattern(Pattern pattern);
+	void AddSignature(const Signature &signature);
 	void BuildTrie();
 	void AssignFailureLinks();
 
-	std::vector<Match> Search(const std::vector<std::byte> &data);
+	std::vector<const Signature *> Search(const std::vector<std::byte> &data);
 };

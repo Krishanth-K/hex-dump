@@ -1,5 +1,6 @@
 #include "aho_corasick.hpp"
 #include <cstddef>
+#include <locale>
 #include <memory>
 #include <queue>
 #include <vector>
@@ -8,9 +9,9 @@ TrieNode::TrieNode() : failure(nullptr) {};
 
 AhoCorasick::AhoCorasick() : root(std::make_shared<TrieNode>()) {};
 
-void AhoCorasick::AddPattern(std::vector<std::byte> pattern)
+void AhoCorasick::AddSignature(const Signature &signature)
 {
-	this->patterns.push_back(pattern);
+	this->patterns.push_back(&signature);
 }
 
 // build the trie
@@ -18,12 +19,12 @@ void AhoCorasick::BuildTrie()
 {
 	this->root = std::make_shared<TrieNode>();
 
-	for (int i = 0; i < this->patterns.size(); i++)
+	for (size_t i = 0; i < this->patterns.size(); i++)
 	{
 		auto pattern = this->patterns[i];
 		std::shared_ptr<TrieNode> node = this->root;
 
-		for (const auto &byte : pattern)
+		for (const auto &byte : pattern->bytes)
 		{
 			if (node->children.find(byte) == node->children.end())
 				node->children[byte] = std::make_shared<TrieNode>();
@@ -81,9 +82,10 @@ void AhoCorasick::AssignFailureLinks()
 	}
 }
 
-std::vector<Match> AhoCorasick::Search(const std::vector<std::byte> &data)
+std::vector<const Signature *>
+AhoCorasick::Search(const std::vector<std::byte> &data)
 {
-	std::vector<Match> results;
+	std::vector<const Signature *> results;
 	auto current = this->root;
 
 	for (size_t i = 0; i < data.size(); ++i)
@@ -99,12 +101,21 @@ std::vector<Match> AhoCorasick::Search(const std::vector<std::byte> &data)
 
 		for (const auto &pattern_id : current->ending_patterns)
 		{
-			size_t start_offset = i - this->getPattern(pattern_id).size() + 1;
-			results.push_back({start_offset, pattern_id});
+			const Signature *signature = getSignature(pattern_id);
+			size_t needed_offset = signature->offset;
+			size_t start_offset = i - signature->bytes.size() + 1;
+
+			if (needed_offset != start_offset && needed_offset != -1)
+				continue;
+
+			results.push_back(signature);
 		}
 	}
 
 	return results;
 }
 
-Pattern &AhoCorasick::getPattern(size_t id) { return this->patterns.at(id); }
+const Signature *AhoCorasick::getSignature(size_t id)
+{
+	return this->patterns.at(id);
+}
