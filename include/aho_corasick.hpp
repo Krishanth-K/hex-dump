@@ -37,6 +37,5 @@ class AhoCorasick {
 	void BuildTrie();
 	void AssignFailureLinks();
 
-	// PERF: Push pattern code instead of entire patterns
 	std::vector<Match> Search(const std::vector<std::byte> &data);
 };

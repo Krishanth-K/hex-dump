@@ -115,7 +115,8 @@ int main(int argc, char *argv[])
 	//
 	// const std::string filePath = argv[1];
 
-	const std::string filePath = "./build/nets_engine.exe";
+	// const std::string filePath = "./build/nets_engine.exe";
+	const std::string filePath = "./build/ATDE-32-ATDE221253.pdf";
 
 	// open the file in binary mode
 	std::ifstream file(filePath, std::ios::binary);
@@ -128,8 +129,8 @@ int main(int argc, char *argv[])
 	file.seekg(0, std::fstream::beg);
 
 	// read it into a buffer
-	std::vector<std::byte> buffer(size);
 	// FIX: What happens when file size < buffer size
+	std::vector<std::byte> buffer(size);
 	file.read(reinterpret_cast<char *>(buffer.data()), size);
 
 	// hexdump the buffer
@@ -139,7 +140,7 @@ int main(int argc, char *argv[])
 
 	// load all signatures into the tree
 	auto signatures = getSignatures();
-	for (const auto [signature, filetype, offset] : signatures)
+	for (const auto &[signature, filetype, offset] : signatures)
 		tree.AddPattern(signature);
 
 	tree.BuildTrie();
