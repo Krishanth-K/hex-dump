@@ -2,7 +2,6 @@
 
 ![C++20](httpshttps://img.shields.io/badge/C%2B%2B-20-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS-orange.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
 
 > A fast, modern command-line tool for viewing file contents in hexadecimal and identifying file types using magic number signatures.
 
@@ -18,8 +17,6 @@
   - [Prerequisites](#prerequisites)
   - [Building](#building)
 - [Usage](#usage)
-- [Contributing](#contributing)
-- [License](#license)
 
 ---
 
@@ -97,20 +94,4 @@ Run the tool from the command line, passing the path of the file you wish to ins
   Offset: 0x0 | Pattern: 89 50 4e 47 0d 0a 1a 0a | File type: png
 ```
 
----
 
-## Contributing
-
-Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-1.  Fork the Project
-2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4.  Push to the Branch (`git push origin feature/AmazingFeature`)
-5.  Open a Pull Request
-
----
-
-## License
-
-Distributed under the MIT License.
