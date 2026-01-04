@@ -1,6 +1,6 @@
 # `hex-dump`: A Hex Viewer and File Type Finder
 
-![C++20](httpshttps://img.shields.io/badge/C%2B%2B-20-blue.svg)
+![C++20](https://img.shields.io/badge/C%2B%2B-20-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS-orange.svg)
 
 > A fast, modern command-line tool for viewing file contents in hexadecimal and identifying file types using magic number signatures.
