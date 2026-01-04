@@ -1,0 +1,3 @@
+/home/krish/Dev/cli/build/CMakeFiles/cli.dir
+/home/krish/Dev/cli/build/CMakeFiles/edit_cache.dir
+/home/krish/Dev/cli/build/CMakeFiles/rebuild_cache.dir

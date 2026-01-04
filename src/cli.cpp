@@ -1,15 +1,5 @@
-#include "aho_corasick.hpp"
-#include <cstddef>
+#include "cli.hpp"
 #include <cstdint>
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <sstream>
-#include <string>
-#include <vector>
-
-using std::cout;
-using std::endl;
 
 // TODO: Make the error handling more robust
 // HACK:  Why does reinterpret_cast cast work here, and not something else???
@@ -45,24 +35,6 @@ void print_search_results(const std::vector<Match> &results, AhoCorasick &tree)
 		std::cout << std::dec << "\n";
 	}
 }
-
-// convert a hex string into std::bytes
-std::vector<std::byte> parse_hex(const std::string &hex)
-{
-	std::vector<std::byte> bytes;
-	if (hex.size() % 2 != 0)
-		throw std::runtime_error("Invalid hex length");
-
-	for (size_t i = 0; i < hex.size(); i += 2)
-	{
-		uint8_t b = std::stoi(hex.substr(i, 2), nullptr, 16);
-		bytes.push_back(static_cast<std::byte>(b));
-	}
-	return bytes;
-}
-
-#include <iomanip>
-#include <iostream>
 
 // Print std::bytes in a readable manner
 void hexdump(const std::vector<std::byte> &buf, size_t limit = 64,
@@ -143,10 +115,12 @@ int main(int argc, char *argv[])
 	//
 	// const std::string filePath = argv[1];
 
-	const std::string filePath = "./nets_engine.exe";
+	const std::string filePath = "./build/nets_engine.exe";
 
 	// open the file in binary mode
 	std::ifstream file(filePath, std::ios::binary);
+	if (!file)
+		throw std::runtime_error("Failed to open file");
 
 	// find size of file
 	file.seekg(0, std::fstream::end);
@@ -155,13 +129,19 @@ int main(int argc, char *argv[])
 
 	// read it into a buffer
 	std::vector<std::byte> buffer(size);
+	// FIX: What happens when file size < buffer size
 	file.read(reinterpret_cast<char *>(buffer.data()), size);
 
 	// hexdump the buffer
 	hexdump(buffer, 128);
 
 	AhoCorasick tree = AhoCorasick();
-	tree.AddPattern(parse_hex("7f454c46"));
+
+	// load all signatures into the tree
+	auto signatures = getSignatures();
+	for (const auto [signature, filetype, offset] : signatures)
+		tree.AddPattern(signature);
+
 	tree.BuildTrie();
 	tree.AssignFailureLinks();
 	auto res = tree.Search(std::vector(buffer.begin(), buffer.begin() + 30));

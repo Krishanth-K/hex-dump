@@ -1,24 +1,22 @@
-CXX      := g++
-CXXFLAGS := -std=c++17 -Wall -Wextra -Wpedantic -O2
-LDFLAGS  :=
+BUILD_DIR := build
+TARGET    := $(BUILD_DIR)/cli
 
-TARGET   := cli
-SRCS     := cli.cpp aho_corasick.cpp
-OBJS     := $(SRCS:.cpp=.o)
+.PHONY: all configure build run clean rebuild
 
-.PHONY: all run clean
+all: run
 
-all: $(TARGET)
+configure:
+	mkdir -p $(BUILD_DIR)
+	cd $(BUILD_DIR) && cmake ..
 
-$(TARGET): $(OBJS)
-	$(CXX) $(OBJS) -o $@ $(LDFLAGS)
+build: configure
+	cd $(BUILD_DIR) && cmake --build .
 
-%.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c $< -o $@
-
-run: $(TARGET)
-	./$(TARGET)
+run: build
+	clear && $(TARGET)
 
 clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -rf $(BUILD_DIR)
+
+rebuild: clean all
 

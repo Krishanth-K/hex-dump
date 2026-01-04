@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/krish/Dev/cli/build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
