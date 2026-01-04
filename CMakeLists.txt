@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(cli
+project(hex-dump
     VERSION 0.1
     LANGUAGES CXX
 )
@@ -32,9 +32,9 @@ set(SOURCES
 )
 
 # ---- Target ----
-add_executable(cli ${SOURCES})
+add_executable(hex-dump ${SOURCES})
 
-target_include_directories(cli
+target_include_directories(hex-dump
     PRIVATE
         ${PROJECT_SOURCE_DIR}/include
 )

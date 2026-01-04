@@ -1,266 +1,116 @@
-# File Signature Detector
+# `hex-dump`: A Hex Viewer and File Type Finder
 
-A command-line tool for identifying file types based on their file signatures. This tool uses the Aho-Corasick algorithm for efficient multi-pattern searching.
+![C++20](httpshttps://img.shields.io/badge/C%2B%2B-20-blue.svg)
+![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS-orange.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
 
-## Description
+> A fast, modern command-line tool for viewing file contents in hexadecimal and identifying file types using magic number signatures.
 
-This project is a C++ application that scans a given file for known file signatures (also known as "magic numbers") to determine the file's type. It uses a memory-mapped file for efficient reading and the Aho-Corasick algorithm to search for all signatures in a single pass.
+`hex-dump` is a C++ application for developers, reverse engineers, and digital forensics analysts who need a quick way to inspect file internals and determine a file's true type, regardless of its extension.
 
-## Building and Running
+---
 
-This project uses CMake for building.
+## Table of Contents
+
+- [About The Project](#about-the-project)
+- [Features](#features)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Building](#building)
+- [Usage](#usage)
+- [Contributing](#contributing)
+- [License](#license)
+
+---
+
+## About The Project
+
+This tool serves two primary purposes: a hex viewer and a file type finder.
+
+As a **hex viewer**, it provides a clean, formatted hexadecimal and ASCII representation of a file's contents.
+
+As a **file type finder**, it reads a file's raw byte content and searches for known "magic number" signatures that identify its true type. For example, it can identify a PNG image even if it's been renamed with a `.txt` extension.
+
+Efficiency is a core design goal. `hex-dump` uses memory-mapped I/O (`mmap`) to handle large files with minimal overhead and the Aho-Corasick algorithm to search for all known file signatures in a single, efficient pass.
+
+---
+
+## Features
+
+- **Dual Functionality**: Acts as both a hex viewer and a file type finder.
+- **High-speed Scanning**: Utilizes memory-mapped files to minimize I/O overhead.
+- **Efficient Multi-pattern Search**: Employs the Aho-Corasick algorithm to find all known signatures in one pass.
+- **Cross-Platform**: Built with standard C++ and CMake, targeting POSIX-compliant systems (Linux, macOS).
+
+---
+
+## Getting Started
+
+Follow these instructions to get a copy of the project up and running on your local machine.
 
 ### Prerequisites
 
-*   A C++ compiler that supports C++20 (e.g., GCC 10 or later, Clang 12 or later)
-*   CMake (version 3.10 or later)
-*   Make
+- **C++20 Compliant Compiler**:
+  - GCC 10 or newer
+  - Clang 12 or newer
+- **CMake**:
+  - Version 3.10 or newer
+- **Git**
 
-### Build Steps
+### Building
 
-1.  Clone the repository:
-    ```bash
-    git clone <repository-url>
-    cd file-signature-detector
+1.  **Clone the repository**
+    ```sh
+    git clone https://github.com/your_username/hex-dump.git
+    cd hex-dump
     ```
-
-2.  Create a build directory:
-    ```bash
-    mkdir build
-    cd build
-    ```
-
-3.  Run CMake and build the project:
-    ```bash
+2.  **Create a build directory and configure**
+    ```sh
+    mkdir build && cd build
     cmake ..
+    ```
+3.  **Compile the project**
+    ```sh
     make
     ```
+The compiled binary, `hex-dump`, will be located in the `build` directory.
 
-    This will create an executable named `file-signature-detector` in the `build` directory.
+---
 
 ## Usage
 
-To use the tool, provide the path to the file you want to analyze as a command-line argument:
+Run the tool from the command line, passing the path of the file you wish to inspect as an argument.
 
-```bash
-./build/file-signature-detector /path/to/your/file
+```sh
+./build/hex-dump /path/to/your/file.ext
 ```
 
-The tool will then output a hexdump of the beginning of the file and a list of any matching file signatures it found.
-
-## Project Structure
+### Example Output
 
 ```
-.
-├── CMakeLists.txt
-├── include
-│   ├── aho_corasick.hpp
-│   └── cli.hpp
-├── misc
-│   ├── common_signatures.csv
-│   ├── file_signatures_subset.csv
-│   └── filtered_signatures.csv
-├── src
-│   ├── aho_corasick.cpp
-│   ├── cli.cpp
-│   └── main.cpp
-└── README.md
+[+] Hexdump of the first 100 bytes:
+00000000: 89 50 4e 47 0d 0a 1a 0a 00 00 00 0d 49 48 44 52  |.PNG........IHDR|
+00000010: 00 00 01 f4 00 00 01 f4 08 06 00 00 00 1f 15 c4  |................|
+...
+
+[+] Matches found: 1
+  Offset: 0x0 | Pattern: 89 50 4e 47 0d 0a 1a 0a | File type: png
 ```
 
-*   `src/main.cpp`: The main entry point for the application.
-*   `src/cli.cpp`, `include/cli.hpp`: Contains functions for the command-line interface, including hexdump and file signature definitions.
-*   `src/aho_corasick.cpp`, `include/aho_corasick.hpp`: Implementation of the Aho-Corasick algorithm.
-*   `misc/`: Contains CSV files with file signatures. (Note: Currently, the signatures are hardcoded in `src/cli.cpp`).
+---
+
+## Contributing
+
+Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+1.  Fork the Project
+2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4.  Push to the Branch (`git push origin feature/AmazingFeature`)
+5.  Open a Pull Request
+
+---
 
 ## License
 
-T# Binary Filetype Detection Engine
-
-A low-level, mmap-based filetype detection engine written in C++.
-
-This project identifies the *real* type of a file based on its binary structure — not its extension — using a two-phase detection pipeline inspired by malware scanners and forensic tools.
-
-If a file lies, this tool doesn’t believe it.
-
----
-
-## 🚀 What This Is
-
-This is **not** a wrapper around `libmagic`.
-This is **not** string-matching magic bytes and calling it a day.
-
-This engine:
-
-1. Scans raw bytes efficiently using **Aho–Corasick**
-2. Generates *candidate* filetypes from known signatures
-3. Performs **structural validation** to eliminate false positives
-
-The result is **high-confidence filetype detection**, even for:
-
-* renamed files
-* embedded containers
-* large disk images
-* malware samples
-
----
-
-## 🧠 Design Philosophy
-
-> Signatures propose. Validators prove.
-
-Magic bytes alone are unreliable. Real formats have rules.
-
-This engine enforces those rules.
-
----
-
-## 🧱 Architecture Overview
-
-```
-Raw File
-  ↓
-[mmap]
-  ↓
-Aho–Corasick Signature Scan
-  ↓
-Candidate Filetypes
-  ↓
-Structural Validators
-  ↓
-Confirmed Filetypes
-```
-
-Each stage exists because the previous one is insufficient on its own.
-
----
-
-## 📦 Components
-
-### 1. MappedFile (Zero-Copy File Access)
-
-Uses `mmap` to treat the file as a read-only byte array.
-
-* No heap allocation
-* Kernel-managed paging
-* Efficient random access
-* Handles multi-gigabyte files
-
-```cpp
-MappedFile mf("sample.iso");
-const std::byte* data = mf.getData();
-size_t size = mf.getSize();
-```
-
----
-
-### 2. Signatures + Aho–Corasick
-
-All known file signatures are loaded into an Aho–Corasick trie.
-
-Each signature contains:
-
-* byte pattern
-* expected offset (optional)
-* associated filetype
-* weight (confidence contribution)
-
-This allows:
-
-* single-pass scanning
-* O(n) performance
-* simultaneous matching of hundreds of signatures
-
-Signatures **do not confirm** a filetype — they only nominate candidates.
-
----
-
-### 3. Candidate Scoring
-
-Signature hits are aggregated per filetype using weights:
-
-```cpp
-scores[filetype] += signature.weight;
-```
-
-This produces a ranked list of *possible* formats.
-
-Still not trusted.
-
----
-
-### 4. Structural Validators (The Important Part)
-
-Each file format has a dedicated validator that enforces rules from the format specification.
-
-Validators are selected via a lookup table:
-
-```cpp
-validators["pdf"] = PDFValidator;
-validators["zip"] = ZIPValidator;
-```
-
-If validation fails, the filetype is rejected — even if signatures matched.
-
----
-
-## 🧪 Currently Supported Validators
-
-| Format | Validation Checks                          |
-| ------ | ------------------------------------------ |
-| PE     | DOS header, e_lfanew sanity, NT header     |
-| ZIP    | Local header + End of Central Directory    |
-| PDF    | %PDF- header, %%EOF, xref presence         |
-| ISO    | Primary Volume Descriptor (CD001 @ 0x8001) |
-
-Validators are intentionally conservative to minimize false positives.
-
----
-
-## 📄 Example Output
-
-```
-[+] Matches found: 2
-  Offset: 0x8001 | Pattern: 43 44 30 30 31 | File type: iso
-  Offset: 0x9001 | Pattern: 43 44 30 30 31 | File type: iso
-
-Confirmed filetypes:
-  iso
-```
-
----
-
-## ⚙️ Build & Run
-
-### Build
-
-```
-mkdir build
-cd build
-cmake ..
-make
-```
-
-### Run
-
-```
-./detector path/to/file
-```
-
-Large files (ISOs, disk images, dumps) are fully supported.
-
----
-
-## 🧩 Extending the Engine
-
-### Adding a New Filetype
-
-1. Add one or more signatures
-2. Implement a `FileValidator`
-3. Register the validator
-
-```cpp
-validators["elf"] = std::make_shared<ELFValidator>();
-```
-
-That’s it.
-
+Distributed under the MIT License.

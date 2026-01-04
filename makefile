@@ -1,5 +1,5 @@
 BUILD_DIR := build
-TARGET    := $(BUILD_DIR)/cli
+TARGET    := $(BUILD_DIR)/hex-dump
 
 .PHONY: all configure build run clean rebuild
 

@@ -85,10 +85,11 @@ int main(int argc, char *argv[])
 	std::vector<const Signature *> res = tree.Search(mapFile);
 	auto filetypes = detectFiletypes(mapFile, res);
 
-	// print_search_results(res);
+	print_search_results(res);
 
+	cout << "Confirmed types: \n";
 	for (const auto &type : filetypes)
-		cout << "filetype: " << type << "\n";
+		cout << "  filetype: " << type << "\n";
 
 	return 0;
 }
