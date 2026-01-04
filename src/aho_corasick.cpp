@@ -105,7 +105,39 @@ AhoCorasick::Search(const std::vector<std::byte> &data)
 			size_t needed_offset = signature->offset;
 			size_t start_offset = i - signature->bytes.size() + 1;
 
-			if (needed_offset != start_offset && needed_offset != -1)
+			if (needed_offset != start_offset)
+				continue;
+
+			results.push_back(signature);
+		}
+	}
+
+	return results;
+}
+
+std::vector<const Signature *> AhoCorasick::Search(MappedFile &mapFile)
+{
+	std::vector<const Signature *> results;
+	auto current = this->root;
+
+	for (size_t i = 0; i < mapFile.len; ++i)
+	{
+		std::byte b = mapFile.start_byte[i];
+
+		while (current != this->root &&
+		       current->children.find(b) == current->children.end())
+			current = current->failure;
+
+		if (current->children.find(b) != current->children.end())
+			current = current->children[b];
+
+		for (const auto &pattern_id : current->ending_patterns)
+		{
+			const Signature *signature = getSignature(pattern_id);
+			size_t needed_offset = signature->offset;
+			size_t start_offset = i - signature->bytes.size() + 1;
+
+			if (needed_offset != start_offset)
 				continue;
 
 			results.push_back(signature);

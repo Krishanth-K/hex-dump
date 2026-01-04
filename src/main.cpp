@@ -1,5 +1,33 @@
 #include "aho_corasick.hpp"
 #include "cli.hpp"
+#include "mapped_file.hpp"
+#include "signature.hpp"
+#include <cstddef>
+#include <fcntl.h>
+#include <fstream>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <vector>
+
+// Read the file into a vector using "read"
+void ReadFile(const std::string filePath, std::vector<std::byte> &buffer)
+{
+	// open the file in binary mode
+	std::ifstream file(filePath, std::ios::binary);
+	if (!file)
+		throw std::runtime_error("Failed to open file");
+
+	// find size of file
+	file.seekg(0, std::fstream::end);
+	size_t size = file.tellg();
+	file.seekg(0, std::fstream::beg);
+
+	buffer.resize(size);
+
+	// read it into a buffer
+	file.read(reinterpret_cast<char *>(buffer.data()), size);
+}
 
 int main(int argc, char *argv[])
 {
@@ -17,30 +45,26 @@ int main(int argc, char *argv[])
 	// const std::string filePath = argv[1];
 
 	// const std::string filePath = "./build/nets_engine.exe";
-	// const std::string filePath = "./build/test.zip";
+	const std::string filePath = "./build/test.zip";
 	// const std::string filePath = "./build/L9-Quick Review of Process.pptx";
 	// const std::string filePath = "./build/ramdump.raw";
-	const std::string filePath = "./build/archlinux-2026.01.01-x86_64.iso";
+	// const std::string filePath = "./build/archlinux-2026.01.01-x86_64.iso";
 	// const std::string filePath = "./build/LAB-3.docx";
 	// const std::string filePath = "./build/ATDE-32-ATDE221253.pdf";
 	// const std::string filePath = "./build/Emotet Malware _ CISA.html";
 
-	// open the file in binary mode
-	std::ifstream file(filePath, std::ios::binary);
-	if (!file)
-		throw std::runtime_error("Failed to open file");
+	// ==============================
+	// // Read using normal open
+	// std::vector<std::byte> buffer;
+	// ReadFile(filePath, buffer);
+	//
+	// // hexdump the buffer
+	// hexdump(buffer, 100);
+	// ==============================
 
-	// find size of file
-	file.seekg(0, std::fstream::end);
-	size_t size = file.tellg();
-	file.seekg(0, std::fstream::beg);
-
-	// read it into a buffer
-	std::vector<std::byte> buffer(size);
-	file.read(reinterpret_cast<char *>(buffer.data()), size);
-
-	// hexdump the buffer
-	hexdump(buffer, 100);
+	// Read using memory map
+	MappedFile mapFile(filePath.c_str());
+	hexdump(mapFile, 100);
 
 	AhoCorasick tree = AhoCorasick();
 
@@ -53,8 +77,12 @@ int main(int argc, char *argv[])
 	tree.AssignFailureLinks();
 
 	// Search for patterns
-	std::vector<const Signature *> res =
-	    tree.Search(std::vector(buffer.begin(), buffer.end()));
+	// std::vector<const Signature *> res =
+	// tree.Search(std::vector(buffer.begin(), buffer.end()));
+
+	// Search for patterns
+	std::vector<const Signature *> res = tree.Search(mapFile);
+
 	print_search_results(res);
 
 	return 0;

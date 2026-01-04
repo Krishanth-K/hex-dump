@@ -31,4 +31,5 @@ class AhoCorasick {
 	void AssignFailureLinks();
 
 	std::vector<const Signature *> Search(const std::vector<std::byte> &data);
+	std::vector<const Signature *> Search(MappedFile &mapFile);
 };

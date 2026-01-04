@@ -1,14 +1,14 @@
 #include "cli.hpp"
-#include "aho_corasick.hpp"
 #include <cctype>
 #include <cstdint>
+#include <iomanip>
+#include <sstream>
+#include <sys/mman.h>
 #include <vector>
 
 // TODO: Make the error handling more robust
-// HACK:  Why does reinterpret_cast cast work here, and not something else???
 //
 // TODO: print absolute offsets instead of line numbers
-// TEST: test the partial line fix
 //
 
 // Print std::bytes in a readable manner
@@ -30,6 +30,68 @@ void hexdump(const std::vector<std::byte> &buf, size_t limit,
 		// casting std::byte to int directly is wrong -> defeats the purpose of
 		// std::byte. requires explicity type conversion
 		int byte = std::to_integer<int>(buf[i]);
+		outStream << std::setw(2) << std::setfill('0') << std::hex << byte;
+
+		// write the ascii value if its a printable char
+		if (byte >= 32 && byte <= 126)
+			asciiString.push_back(static_cast<char>(byte));
+		else
+			asciiString.push_back('.');
+
+		// group into pairs
+		if (i % bytesPerGroup == 1)
+			outStream << " ";
+
+		// add the ascii string at the end of a line
+		if (i % bytesPerLine == bytesPerLine - 1)
+		{
+			outStream << "  |  " << asciiString;
+			outStream << "\n";
+
+			asciiString = "";
+		}
+	}
+
+	// if the last line was partial
+	size_t remaining = asciiString.size();
+	if (remaining > 0 && remaining < bytesPerLine)
+	{
+		size_t missing = bytesPerLine - remaining;
+
+		// each byte prints as "XX", plus a space after each group
+		for (size_t j = 0; j < missing; j++)
+		{
+			outStream << "  "; // missing hex byte
+
+			// add group space if needed
+			if ((remaining + j) % bytesPerGroup == bytesPerGroup - 1)
+				outStream << " ";
+		}
+
+		outStream << "  |  " << asciiString << "\n";
+	}
+
+	cout << outStream.str();
+}
+
+void hexdump(MappedFile &mapFile, size_t limit, size_t bytesPerGroup,
+             size_t bytesPerLine)
+{
+	std::string asciiString;
+
+	// creating a temp out stream, to prevent global stream poisoning
+	std::ostringstream outStream;
+
+	for (size_t i = 0; i < mapFile.len && i < limit; i++)
+	{
+		// the "line" address
+		if (i % bytesPerLine == 0)
+			outStream << std::setw(8) << std::setfill('0') << std::hex << i
+			          << ": ";
+
+		// casting std::byte to int directly is wrong -> defeats the purpose of
+		// std::byte. requires explicity type conversion
+		int byte = std::to_integer<int>(mapFile.start_byte[i]);
 		outStream << std::setw(2) << std::setfill('0') << std::hex << byte;
 
 		// write the ascii value if its a printable char
