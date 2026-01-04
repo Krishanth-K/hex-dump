@@ -8,3 +8,5 @@ trie.py
 
 .cache/**
 build/
+
+next.md
