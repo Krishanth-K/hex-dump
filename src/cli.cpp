@@ -11,37 +11,10 @@
 // TEST: test the partial line fix
 //
 
-// print all matches
-void print_search_results(std::vector<const Signature *> &results)
-{
-	if (results.empty())
-	{
-		std::cout << "[+] No matches found\n";
-		return;
-	}
-
-	std::cout << "[+] Matches found: " << results.size() << "\n";
-
-	for (const auto result : results)
-	{
-		std::cout << "  Offset: 0x" << std::hex << result->offset << std::dec
-		          << " | Pattern: ";
-
-		for (std::byte b : result->bytes)
-		{
-			uint8_t v = std::to_integer<uint8_t>(b);
-			std::cout << std::hex << std::setw(2) << std::setfill('0')
-			          << static_cast<int>(v) << " ";
-		}
-		std::cout << " | File type: " << result->filetype << "\n";
-	}
-}
-
 // Print std::bytes in a readable manner
-void hexdump(const std::vector<std::byte> &buf, size_t limit = 64,
-             size_t bytesPerGroup = 2, size_t bytesPerLine = 16)
+void hexdump(const std::vector<std::byte> &buf, size_t limit,
+             size_t bytesPerGroup, size_t bytesPerLine)
 {
-	int bytesWritten = 0;
 	std::string asciiString;
 
 	// creating a temp out stream, to prevent global stream poisoning
@@ -99,58 +72,6 @@ void hexdump(const std::vector<std::byte> &buf, size_t limit = 64,
 	}
 
 	cout << outStream.str();
-}
-
-int main(int argc, char *argv[])
-{
-	// if (argc == 1)
-	// {
-	// 	cout << "[ERROR]: Enter a filepath" << endl;
-	// 	return -1;
-	// }
-	// else if (argc > 2)
-	// {
-	// 	cout << "[ERROR]: Too many arguments" << endl;
-	// 	return -2;
-	// }
-	//
-	// const std::string filePath = argv[1];
-
-	// const std::string filePath = "./build/nets_engine.exe";
-	const std::string filePath = "./build/ATDE-32-ATDE221253.pdf";
-
-	// open the file in binary mode
-	std::ifstream file(filePath, std::ios::binary);
-	if (!file)
-		throw std::runtime_error("Failed to open file");
-
-	// find size of file
-	file.seekg(0, std::fstream::end);
-	size_t size = file.tellg();
-	file.seekg(0, std::fstream::beg);
-
-	// read it into a buffer
-	// FIX: What happens when file size < buffer size
-	std::vector<std::byte> buffer(size);
-	file.read(reinterpret_cast<char *>(buffer.data()), size);
-
-	// hexdump the buffer
-	hexdump(buffer, 128);
-
-	AhoCorasick tree = AhoCorasick();
-
-	// load all signatures into the tree
-	auto signatures = getSignatures();
-	for (const auto &signature : signatures)
-		tree.AddSignature(signature);
-
-	tree.BuildTrie();
-	tree.AssignFailureLinks();
-	std::vector<const Signature *> res =
-	    tree.Search(std::vector(buffer.begin(), buffer.begin() + 30));
-	print_search_results(res);
-
-	return 0;
 }
 
 std::vector<Signature> file_signatures = {
@@ -253,4 +174,30 @@ std::vector<std::byte> hexToBytes(const std::string &hex)
 	}
 
 	return bytes;
+}
+
+// print all matches
+void print_search_results(std::vector<const Signature *> &results)
+{
+	if (results.empty())
+	{
+		std::cout << "[+] No matches found\n";
+		return;
+	}
+
+	std::cout << "[+] Matches found: " << results.size() << "\n";
+
+	for (const auto result : results)
+	{
+		std::cout << "  Offset: 0x" << std::hex << result->offset << std::dec
+		          << " | Pattern: ";
+
+		for (std::byte b : result->bytes)
+		{
+			uint8_t v = std::to_integer<uint8_t>(b);
+			std::cout << std::hex << std::setw(2) << std::setfill('0')
+			          << static_cast<int>(v) << " ";
+		}
+		std::cout << " | File type: " << result->filetype << "\n";
+	}
 }

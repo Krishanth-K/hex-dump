@@ -26,3 +26,8 @@ std::vector<Signature> getSignatures();
 
 // convert a hex string into std::bytes
 std::vector<std::byte> hexToBytes(const std::string &hex);
+
+void print_search_results(std::vector<const Signature *> &results);
+
+void hexdump(const std::vector<std::byte> &buf, size_t limit = 64,
+             size_t bytesPerGroup = 2, size_t bytesPerLine = 16);

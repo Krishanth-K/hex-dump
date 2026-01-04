@@ -6,5 +6,5 @@ cli
 
 trie.py
 
-.cache/
+.cache/*
 build/

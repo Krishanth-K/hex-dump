@@ -15,6 +15,9 @@ build: configure
 run: build
 	clear && $(TARGET)
 
+runnoc: build
+	$(TARGET)
+
 clean:
 	rm -rf $(BUILD_DIR)
 

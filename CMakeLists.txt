@@ -24,6 +24,7 @@ endif()
 
 # ---- Sources ----
 set(SOURCES
+    src/main.cpp
     src/cli.cpp
     src/aho_corasick.cpp
 )
